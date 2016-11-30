@@ -126,12 +126,10 @@ read_opts() {
             -U | --url )
                 shift
                 gh_repo_url=$1
-                echo "URL="$gh_repo_url
                 ;;
             -u | --username )
                 shift
                 bb_username=$1
-                echo $bb_username
                 ;;
             -p | --password )
                 shift
