@@ -16,6 +16,9 @@ local_repos_path="$HOME/.$command_name-tmp"
 bb_api_url="https://api.bitbucket.org/2.0"
 bb_ssh_url="git@bitbucket.org"
 remote_url_name="origin"
+color_error="\033[31;1m" # red, bold
+color_warn="\033[33m" # yellow
+color_reset="\033[m"
 
 # show version info
 version() {
@@ -46,15 +49,15 @@ EOF
 # check if user input required options
 check_required_items() {
     if [ -z "$gh_repo_url" ]; then
-        echo "error: \"--url\" item is not found"
+        echo -e $color_error"error: \"--url\" item is not found"$color_reset
         exit 1
     fi
     if [ -z "$bb_username" ]; then
-        echo "error: \"--username\" item is not found"
+        echo -e $color_error"error: \"--username\" item is not found"$color_reset
         exit 1
     fi
     if [ -z "$bb_password" ]; then
-        echo "error: \"--password\" item is not found"
+        echo -e $color_error"error: \"--password\" item is not found"$color_reset
         exit 1
     fi
 }
@@ -95,7 +98,7 @@ create_repo() {
     -d "{\"scm\": \"git\", \"is_private\": \"$is_private\", \"name\": \"$gh_repo_name\"}"`
 
     # TODO: if receive {"type": "error", "error": {"fields": {"name": ["You already have a repository with this name."]}, "message": "Repository with this Slug and Owner already exists."}} then
-    # echo $bb_response
+    # echo -e $color_warn"warn: \"$gh_repo_name\" repository is already exists in Bitbucket"$color_reset
 }
 
 # git push to Bitbucket
@@ -155,7 +158,7 @@ read_opts() {
                 exit 0
                 ;;
             * ) # default case
-                echo "error: \"$1\" option does not exist"
+                echo -e $color_error"error: \"$1\" option does not exist"$color_reset
                 exit 1
                 ;;
         esac
@@ -166,7 +169,7 @@ read_opts() {
 # entry point
 main() {
     if !(type git >/dev/null 2>&1); then
-        echo "error: $command_name requires \"git\", please install"
+        echo -e $color_error"error: $command_name requires \"git\", please install"$color_reset
         exit 1
     fi
 
