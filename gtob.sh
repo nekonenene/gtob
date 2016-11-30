@@ -156,7 +156,6 @@ read_opts() {
         esac
         shift
     done
-    migrate
 }
 
 # entry point
@@ -173,6 +172,7 @@ main() {
             ;;
         * )
             read_opts $@
+            migrate
             exit 0
             ;;
     esac
