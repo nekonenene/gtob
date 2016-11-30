@@ -9,6 +9,7 @@ gh_repo_name=""
 bb_username="" # Bitbucket username
 bb_password="" # Bitbucket password
 is_private=false
+branch_name="master"
 
 # define variables
 local_repos_path="$HOME/.$command_name-tmp"
@@ -35,7 +36,8 @@ Options:
     -U, --url           GitHub repository URL   (*require)
     -u, --username      Your Bitbucket username (*require)
     -p, --password      Your Bitbucket password (*require)
-    --private           create private Bitbucket repository (*option)
+    -b, --branch        Specify branch name (*option, default: master)
+    --private           Create private Bitbucket repository (*option)
     -h, --help          Display this help text
     -v, --version       Display current script version
 EOF
@@ -68,7 +70,7 @@ clone() {
     analyze_repo $gh_repo_url
     tmp_repo_path="$local_repos_path/$gh_repo_name"
     if [ -n "$gh_repo_url" ]; then
-        git clone $gh_repo_url $tmp_repo_path
+        git clone $gh_repo_url $tmp_repo_path --branch $branch_name
     fi
 }
 
@@ -101,6 +103,7 @@ push() {
     current_dir=`pwd`
     cd $tmp_repo_path
     git remote set-url $remote_url_name "$bb_ssh_url:$bb_username/$gh_repo_name.git"
+    git push --set-upstream $remote_url_name $branch_name
     git push $remote_url_name --all
     git push $remote_url_name --tags
     cd $current_dir
@@ -133,6 +136,10 @@ read_opts() {
             -p | --password )
                 shift
                 bb_password=$1
+                ;;
+            -b | --branch )
+                shift
+                branch_name=$1
                 ;;
             --private )
                 is_private=true
