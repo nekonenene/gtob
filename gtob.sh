@@ -8,8 +8,9 @@ gh_repo_user=""
 gh_repo_name=""
 bb_username="" # Bitbucket username
 bb_password="" # Bitbucket password
-is_private=false
 branch_name="master"
+is_private=false
+migrate_wiki=false
 
 # define variables
 local_repos_path="$HOME/.$command_name-tmp"
@@ -40,9 +41,17 @@ Options:
     -u, --username      Your Bitbucket username (*require)
     -p, --password      Your Bitbucket password (*require)
     -b, --branch        Specify branch name (*option, default: master)
-    --private           Create private Bitbucket repository (*option)
+    -P, --private       Create private Bitbucket repository (*option)
+    -w, --wiki          Migrate GitHub Wiki (*option)
     -h, --help          Display this help text
     -v, --version       Display current script version
+
+Examples:
+    create the private Bitbucket repository:
+        $command_name -U git@github.com:username/repo_name.git -u username -p password --private
+    copy "develop" branch and GitHub Wiki:
+        $command_name -U git@github.com:username/repo_name.git -u username -p password -b develop --wiki
+
 EOF
 }
 
@@ -63,18 +72,41 @@ check_required_items() {
 }
 
 # get the username and the repository name from GitHub URL
-analyze_repo() {
+analyze_url() {
     gh_repo_user=`echo "$1" | sed "s/^.*github\.com.\([^\/]\{1,\}\)\/\([^\.]\{1,\}\).*$/\1/"`
     gh_repo_name=`echo "$1" | sed "s/^.*github\.com.\([^\/]\{1,\}\)\/\([^\.]\{1,\}\).*$/\2/"`
 }
 
 # git clone from GitHub
 clone() {
-    analyze_repo $gh_repo_url
     tmp_repo_path="$local_repos_path/$gh_repo_name"
     if [ -n "$gh_repo_url" ]; then
         git clone $gh_repo_url $tmp_repo_path --branch $branch_name
     fi
+}
+
+wiki_clone() {
+    gh_wiki_url=`echo "$gh_repo_url" | sed "s/\.git$/.wiki/"`
+    git clone $gh_wiki_url $tmp_wiki_path
+}
+
+wiki_push() {
+    current_dir=`pwd`
+    cd $tmp_wiki_path
+    git remote set-url origin "$bb_ssh_url:$bb_username/$gh_repo_name.git/wiki"
+    if [ ! -e Home.md ]; then
+        echo "**https://bitbucket.org/$bb_username/$gh_repo_name/wiki/browse/**" >> Home.md
+        git add Home.md
+        git commit -m "Add Home.md"
+    fi
+    git push --force
+}
+
+wiki() {
+    tmp_wiki_path="$tmp_repo_path.wiki"
+    wiki_clone
+    wiki_push
+    rm -rf $tmp_wiki_path
 }
 
 # remove all tmp files (for develop)
@@ -95,7 +127,7 @@ create_repo() {
     bb_response=`curl -X POST "$bb_api_url/repositories/$bb_username/$gh_repo_name" \
     --user "$bb_username:$bb_password" \
     -H "Content-type: application/json" \
-    -d "{\"scm\": \"git\", \"is_private\": \"$is_private\", \"name\": \"$gh_repo_name\"}"`
+    -d "{\"scm\": \"git\", \"is_private\": \"$is_private\", \"name\": \"$gh_repo_name\", \"has_wiki\": \"true\"}"`
 
     # TODO: if receive {"type": "error", "error": {"fields": {"name": ["You already have a repository with this name."]}, "message": "Repository with this Slug and Owner already exists."}} then
     # echo -e $color_warn"warn: \"$gh_repo_name\" repository is already exists in Bitbucket"$color_reset
@@ -106,8 +138,7 @@ push() {
     current_dir=`pwd`
     cd $tmp_repo_path
     git remote set-url $remote_url_name "$bb_ssh_url:$bb_username/$gh_repo_name.git"
-    git push --set-upstream $remote_url_name $branch_name
-    git push $remote_url_name --all
+    git push --set-upstream $remote_url_name $branch_name --force
     git push $remote_url_name --tags
     cd $current_dir
 }
@@ -115,10 +146,14 @@ push() {
 # main steps
 migrate() {
     check_required_items
+    analyze_url $gh_repo_url
     clone
     submodule
     create_repo
     push
+    if [ wiki ]; then
+        wiki
+    fi
     rm -rf $tmp_repo_path
 }
 
@@ -142,8 +177,11 @@ read_opts() {
                 shift
                 branch_name=$1
                 ;;
-            --private )
+            -P | --private )
                 is_private=true
+                ;;
+            -w | --wiki )
+                migrate_wiki=true
                 ;;
             -v | --version )
                 version
