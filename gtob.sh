@@ -100,6 +100,7 @@ wiki_push() {
         git commit -m "Add Home.md"
     fi
     git push --force
+    cd current_dir
 }
 
 wiki() {
