@@ -127,7 +127,7 @@ create_repo() {
     bb_response=`curl -X POST "$bb_api_url/repositories/$bb_username/$gh_repo_name" \
     --user "$bb_username:$bb_password" \
     -H "Content-type: application/json" \
-    -d "{\"scm\": \"git\", \"is_private\": \"$is_private\", \"name\": \"$gh_repo_name\", \"has_wiki\": \"true\"}"`
+    -d "{\"scm\": \"git\", \"is_private\": \"$is_private\", \"name\": \"$gh_repo_name\", \"has_wiki\": \"$migrate_wiki\"}"`
 
     # TODO: if receive {"type": "error", "error": {"fields": {"name": ["You already have a repository with this name."]}, "message": "Repository with this Slug and Owner already exists."}} then
     # echo -e $color_warn"warn: \"$gh_repo_name\" repository is already exists in Bitbucket"$color_reset
@@ -151,7 +151,7 @@ migrate() {
     submodule
     create_repo
     push
-    if [ wiki ]; then
+    if $migrate_wiki; then
         wiki
     fi
     rm -rf $tmp_repo_path
