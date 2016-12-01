@@ -92,15 +92,19 @@ wiki_clone() {
 
 wiki_push() {
     current_dir=`pwd`
-    cd $tmp_wiki_path
-    git remote set-url origin "$bb_ssh_url:$bb_username/$gh_repo_name.git/wiki"
-    if [ ! -e Home.md ]; then
-        echo "**https://bitbucket.org/$bb_username/$gh_repo_name/wiki/browse/**" >> Home.md
-        git add Home.md
-        git commit -m "Add Home.md"
+    if [ ! -e $tmp_wiki_path ]; then
+        echo -e $color_error"error: wiki directory is not exist"$color_reset
+    else
+        cd $tmp_wiki_path
+        git remote set-url origin "$bb_ssh_url:$bb_username/$gh_repo_name.git/wiki"
+        if [ ! -e Home.md ]; then
+            echo "**https://bitbucket.org/$bb_username/$gh_repo_name/wiki/browse/**" >> Home.md
+            git add Home.md
+            git commit -m "Add Home.md"
+        fi
+        git push --force
+        cd current_dir
     fi
-    git push --force
-    cd current_dir
 }
 
 wiki() {
