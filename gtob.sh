@@ -11,6 +11,7 @@ bb_password="" # Bitbucket password
 branch_name="master"
 is_private=false
 migrate_wiki=false
+current_dir=`pwd`
 
 # define variables
 local_repos_path="$HOME/.$command_name-tmp"
@@ -91,19 +92,26 @@ wiki_clone() {
 }
 
 wiki_push() {
-    current_dir=`pwd`
     if [ ! -e $tmp_wiki_path ]; then
         echo -e $color_error"error: wiki directory is not exist"$color_reset
     else
         cd $tmp_wiki_path
         git remote set-url origin "$bb_ssh_url:$bb_username/$gh_repo_name.git/wiki"
         if [ ! -e Home.md ]; then
-            echo "**https://bitbucket.org/$bb_username/$gh_repo_name/wiki/browse/**" >> Home.md
+            echo "# $gh_repo_name  
+### Page List  
+https://bitbucket.org/$bb_username/$gh_repo_name/wiki/browse/" > Home.md
             git add Home.md
             git commit -m "Add Home.md"
+        else
+            echo "  
+### Page List  
+https://bitbucket.org/$bb_username/$gh_repo_name/wiki/browse/" >> Home.md
+            git add Home.md
+            git commit -m "Update Home.md"
         fi
         git push --force
-        cd current_dir
+        cd $current_dir
     fi
 }
 
@@ -122,7 +130,6 @@ clean_all() {
 
 # if the repository has .gitmodules, then rewrite submodule URL
 submodule() {
-    current_dir=`pwd`
     cd $tmp_repo_path
     cd $current_dir
 }
@@ -140,7 +147,6 @@ create_repo() {
 
 # git push to Bitbucket
 push() {
-    current_dir=`pwd`
     cd $tmp_repo_path
     git remote set-url $remote_url_name "$bb_ssh_url:$bb_username/$gh_repo_name.git"
     git push --set-upstream $remote_url_name $branch_name --force
