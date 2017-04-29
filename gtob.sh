@@ -1,6 +1,6 @@
 #!/bin/bash
 
-command_name="gtob"
+command_name="$(basename $0)"
 
 # init variables
 gh_repo_url="" # GitHub repository URL
