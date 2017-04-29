@@ -24,7 +24,7 @@ color_reset="\033[m"
 
 # show version info
 version() {
-    echo "$command_name 0.0.1 by nekonenene <hatonekoe@gmail.com>"
+    echo "$command_name 0.0.2 by nekonenene <hatonekoe@gmail.com>"
 }
 
 # show how to use
