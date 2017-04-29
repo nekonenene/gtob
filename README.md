@@ -19,7 +19,7 @@ $ gtob -U github_repository_url -u bitbucket_username
 clone this repository and move to the top directory
 
 ```
-git clone git@github.com:nekonenene/migrate_github_to_bitbucket.git && cd migrate_github_to_bitbucket
+git clone git@github.com:nekonenene/gtob.git && cd gtob
 ```
 
 and...
