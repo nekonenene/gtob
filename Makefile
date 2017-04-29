@@ -7,7 +7,7 @@ TMP_REPOS_PATH = $(HOME)/.$(COMMAND_NAME)-tmp
 
 install:
 	@echo "install \"$(COMMAND_NAME)\" command..."
-	@cp $(CURRENT_DIR)/$(COMMAND_NAME).sh $(BIN_PATH)/$(COMMAND_NAME)
+	@install -m 755 $(CURRENT_DIR)/$(COMMAND_NAME).sh $(BIN_PATH)/$(COMMAND_NAME)
 	@chmod +x $(BIN_PATH)/$(COMMAND_NAME)
 	@echo "installation completed!"
 
