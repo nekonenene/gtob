@@ -59,15 +59,15 @@ EOF
 # check if user input required options
 check_required_items() {
     if [ -z "$gh_repo_url" ]; then
-        echo -e $color_error"error: \"--url\" item is not found"$color_reset
+        echo -e $color_error"error: \"--url\" item is not found"$color_reset 1>&2
         exit 1
     fi
     if [ -z "$bb_username" ]; then
-        echo -e $color_error"error: \"--username\" item is not found"$color_reset
+        echo -e $color_error"error: \"--username\" item is not found"$color_reset 1>&2
         exit 1
     fi
     if [ -z "$bb_password" ]; then
-        echo -e $color_error"error: \"--password\" item is not found"$color_reset
+        echo -e $color_error"error: \"--password\" item is not found"$color_reset 1>&2
         exit 1
     fi
 }
@@ -207,7 +207,7 @@ read_opts() {
                 exit 0
                 ;;
             * ) # default case
-                echo -e $color_error"error: \"$1\" option does not exist"$color_reset
+                echo -e $color_error"error: \"$1\" option does not exist"$color_reset 1>&2
                 exit 1
                 ;;
         esac
@@ -218,7 +218,7 @@ read_opts() {
 # entry point
 main() {
     if !(type git >/dev/null 2>&1); then
-        echo -e $color_error"error: $command_name requires \"git\", please install"$color_reset
+        echo -e $color_error"error: $command_name requires \"git\", please install"$color_reset 1>&2
         exit 1
     fi
 
