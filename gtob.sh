@@ -24,7 +24,7 @@ color_reset="\033[m"
 
 # show version info
 version() {
-    echo "$command_name 0.0.2 by nekonenene <hatonekoe@gmail.com>"
+    echo "$command_name 1.0.0 by nekonenene <hatonekoe@gmail.com>"
 }
 
 # show how to use
@@ -35,13 +35,13 @@ cat << EOF >&2
 Migrate GitHub repository to Bitbucket
 
 Usage:
-    $command_name -U git@github.com:username/repo_name.git -u bitbucket_username -p bitbucket_password
+    $command_name -U git@github.com:username/repo_name.git -u bitbucket_username
 
 Options:
-    -U, --url           GitHub repository URL   (*require)
-    -u, --username      Your Bitbucket username (*require)
-    -p, --password      Your Bitbucket password (*require)
-    -b, --branch        Specify branch name (*option, default: master)
+    -U, --url           GitHub repository URL
+    -u, --username      Your Bitbucket username
+    -p, --password      Your Bitbucket password (not recommend because insecure)
+    -b, --branch        Specify branch name (default: master)
     -P, --private       Create private Bitbucket repository (*option)
     -w, --wiki          Migrate GitHub Wiki (*option)
     -h, --help          Display this help text
@@ -49,9 +49,9 @@ Options:
 
 Examples:
     create the private Bitbucket repository:
-        $command_name -U git@github.com:username/repo_name.git -u username -p password --private
+        $command_name -U git@github.com:username/repo_name.git -u username --private
     copy "develop" branch and GitHub Wiki:
-        $command_name -U git@github.com:username/repo_name.git -u username -p password -b develop --wiki
+        $command_name -U git@github.com:username/repo_name.git -u username -b develop --wiki
 
 EOF
 }
@@ -59,16 +59,30 @@ EOF
 # check if user input required options
 check_required_items() {
     if [ -z "$gh_repo_url" ]; then
-        echo -e $color_error"error: \"--url\" item is not found"$color_reset 1>&2
-        exit 1
+        read -p "GitHub repository URL: " gh_repo_url
+
+        if [ -z "$gh_repo_url" ]; then
+            echo -e $color_error"error: GitHub repository URL is required"$color_reset 1>&2
+            exit 1
+        fi
     fi
+
     if [ -z "$bb_username" ]; then
-        echo -e $color_error"error: \"--username\" item is not found"$color_reset 1>&2
-        exit 1
+        read -p "Your Bitbucket username: " bb_username
+
+        if [ -z "$bb_username" ]; then
+            echo -e $color_error"error: Bitbucket username is required"$color_reset 1>&2
+            exit 1
+        fi
     fi
+
     if [ -z "$bb_password" ]; then
-        echo -e $color_error"error: \"--password\" item is not found"$color_reset 1>&2
-        exit 1
+        read -sp "Your Bitbucket password: " bb_password
+
+        if [ -z "$bb_password" ]; then
+            echo -e $color_error"error: Bitbucket password is required"$color_reset 1>&2
+            exit 1
+        fi
     fi
 }
 
@@ -93,7 +107,7 @@ wiki_clone() {
 
 wiki_push() {
     if [ ! -e $tmp_wiki_path ]; then
-        echo -e $color_error"error: wiki directory is not exist"$color_reset
+        echo -e $color_error"error: wiki directory is not exist"$color_reset 1>&2
     else
         cd $tmp_wiki_path
         git remote set-url origin "$bb_ssh_url:$bb_username/$gh_repo_name.git/wiki"
@@ -181,8 +195,11 @@ read_opts() {
                 bb_username=$1
                 ;;
             -p | --password )
-                shift
-                bb_password=$1
+                if [ ! -z "$2" ]; then
+                    shift
+                    echo -e $color_warn"warn: Using a password on the command line interface can be insecure"$color_reset 1>&2
+                    bb_password=$1
+                fi
                 ;;
             -b | --branch )
                 shift
@@ -224,7 +241,7 @@ main() {
 
     case $# in
         0 )
-            usage
+            migrate
             exit 0
             ;;
         * )
