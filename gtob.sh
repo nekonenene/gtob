@@ -59,7 +59,7 @@ EOF
 # check if user input required options
 check_required_items() {
     if [ -z "$gh_repo_url" ]; then
-        read -p "GitHub repository URL: " gh_repo_url
+        read -p "GitHub repository URL: " gh_repo_url 2>&1
         echo
 
         if [ -z "$gh_repo_url" ]; then
@@ -69,7 +69,7 @@ check_required_items() {
     fi
 
     if [ -z "$bb_username" ]; then
-        read -p "Your Bitbucket username: " bb_username
+        read -p "Your Bitbucket username: " bb_username 2>&1
         echo
 
         if [ -z "$bb_username" ]; then
@@ -79,7 +79,7 @@ check_required_items() {
     fi
 
     if [ -z "$bb_password" ]; then
-        read -sp "Your Bitbucket password: " bb_password
+        read -sp "Your Bitbucket password: " bb_password 2>&1
         echo
 
         if [ -z "$bb_password" ]; then
